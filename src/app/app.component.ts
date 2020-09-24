@@ -1,5 +1,6 @@
 import { Satellite } from './satellite';
 import { Component, Input } from '@angular/core';
+import { threadId } from 'worker_threads';
 
 @Component({
   selector: 'app-root',
@@ -8,10 +9,12 @@ import { Component, Input } from '@angular/core';
 })
 export class AppComponent {
   title = 'orbit-report';
-  @Input() satellite: Satellite;
+  // @Input() satellite: Satellite;
    sourceList: Satellite[]
+   displayList: Satellite[];
   constructor() {
     this.sourceList = [];
+    this.displayList = [];
     let satellitesUrl = 'https://handlers.education.launchcode.org/static/satellites.json';
 
     window.fetch(satellitesUrl).then(function(response) {
@@ -21,9 +24,23 @@ export class AppComponent {
          let satellite = new Satellite(fetchedSatellites[i].name, fetchedSatellites[i].type, fetchedSatellites[i].launchDate, fetchedSatellites[i].orbitType, fetchedSatellites[i].operational);
              this.sourceList.push(satellite);
         };
+        this.displayList = this.sourceList.slice(0);
       }.bind(this));
     }.bind(this));
  }
+ 
+ search(searchTerm: string): void {
+  let matchingSatellites: Satellite[] = [];
+  searchTerm = searchTerm.toLowerCase();
+  for(let i=0; i < this.sourceList.length; i++) {
+     let name = this.sourceList[i].name.toLowerCase();
+     if (name.indexOf(searchTerm) >= 0) {
+        matchingSatellites.push(this.sourceList[i]);
+     }
+  }
+  
+  this.displayList = matchingSatellites;
+}
 }
 
 
